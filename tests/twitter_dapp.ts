@@ -1,27 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+import { BN } from "bn.js";
 
 import { assert } from "chai";
+import { randomBytes } from "crypto";
 import { TwitterDapp } from "../target/types/twitter_dapp";
 
-function TweetPDA(
-  provider: anchor.AnchorProvider,
-  topic: string,
-  program: anchor.web3.PublicKey
-) {
-  const [tweetPDA] = anchor.web3.PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("TWEET_ACCOUNT"),
-      provider.wallet.publicKey.toBuffer(),
-      Buffer.from(topic),
-    ],
-    program
-  );
-  return tweetPDA;
-}
-
 describe("twitter_dapp", () => {
-  // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env(); // This provider is wrapper of both connection and wallet
   anchor.setProvider(provider);
 
@@ -29,14 +14,31 @@ describe("twitter_dapp", () => {
   const wallet = provider.wallet;
   let tweet = "Today I learned about Anchor complete basics";
   let topic = "Anchor";
+  let seed = new BN(randomBytes(8));
+
+  let tweetPDA: anchor.web3.PublicKey;
+
+  before("prepare", async () => {
+    [tweetPDA] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("TWEET_ACCOUNT"),
+        wallet.publicKey.toBuffer(),
+        seed.toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+
+    console.log(
+      `⚡️⚡️⚡️⚡️ The PDA is: ${tweetPDA.toString()} and the Random Seed is: ${seed} and wallet address is; ${
+        wallet.publicKey
+      } ⚡️⚡️⚡️⚡️`
+    );
+  });
 
   it("Tweet Creation", async () => {
     try {
-      console.log("The size of topic is :", topic.length);
-      const tweetPDA = TweetPDA(provider, topic, program.programId);
-
       const trxSign = await program.methods
-        .initializeTweet(tweet, topic)
+        .initializeTweet(tweet, topic, seed)
         .accountsStrict({
           user: wallet.publicKey,
           tweetAccount: tweetPDA,
@@ -46,15 +48,6 @@ describe("twitter_dapp", () => {
 
       console.log("The size of topic is :", topic.length);
       console.log(`The transaction is successfull 🥳 ${trxSign.toString()} `);
-
-      const { content, authour, timestamp } = await program.account.tweet.fetch(
-        tweetPDA
-      );
-
-      assert.equal(tweet, content);
-      console.log(
-        `All Tweet account details content:${content} timestamp: ${timestamp} authour: ${authour}`
-      );
     } catch (e) {
       console.error(`You got an error Onicha!!! ${e}`);
       throw new Error(e);

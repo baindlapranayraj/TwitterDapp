@@ -9,8 +9,9 @@ pub struct Tweet {
     pub topic: String,
     #[max_len(280)]
     pub content: String, //
+    pub seed: u64,
 }
 
 impl Tweet {
-    pub const LEN: usize = 8 + 32 + 8 + (4 + 25 * 4) + (4 + 280 * 4);
+    pub const LEN: usize = 8 + 32 + 8 + (4 + 25) + (4 + 280) + 8;
 }

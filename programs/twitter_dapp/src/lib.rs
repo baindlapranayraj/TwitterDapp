@@ -14,8 +14,13 @@ declare_id!("7oPujJNFWGHAk3Ht1fgwzKELNBjp6nboGwgXjYGck5ik");
 pub mod twitter_dapp {
     use super::*;
 
-    pub fn initialize_tweet(ctx: Context<SendTweet>, content: String, topic: String) -> Result<()> {
-        match send_tweet(ctx, content, topic) {
+    pub fn initialize_tweet(
+        ctx: Context<SendTweet>,
+        content: String,
+        topic: String,
+        seed: u64,
+    ) -> Result<()> {
+        match send_tweet(ctx, content, topic, seed) {
             Ok(_) => {
                 msg!("Successfully created your ");
                 Ok(())
