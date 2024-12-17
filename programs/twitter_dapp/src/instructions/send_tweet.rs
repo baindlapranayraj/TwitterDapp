@@ -29,7 +29,7 @@ pub fn send_tweet(
 }
 
 #[derive(Accounts)]
-#[instruction(seed:u64)]
+#[instruction(content: String,topic: String,seed:u64)]
 pub struct SendTweet<'info> {
     #[account(mut)]
     pub user: Signer<'info>,

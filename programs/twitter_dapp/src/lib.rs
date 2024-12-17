@@ -20,6 +20,7 @@ pub mod twitter_dapp {
         topic: String,
         seed: u64,
     ) -> Result<()> {
+        msg!("Running your Tweeter Creating Instruction");
         match send_tweet(ctx, content, topic, seed) {
             Ok(_) => {
                 msg!("Successfully created your ");
